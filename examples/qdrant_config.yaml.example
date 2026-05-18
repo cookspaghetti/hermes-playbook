@@ -1,0 +1,15 @@
+# Copy to ~/.hermes/qdrant_config.yaml — single-node local Qdrant.
+# Bound to 127.0.0.1 ONLY — memory contains personal data; never expose the port.
+# Run via systemd (docs/systemd.md) so it restarts with the machine.
+
+storage:
+  storage_path: /home/YOURUSER/.hermes/qdrant_data
+
+service:
+  host: 127.0.0.1
+  grpc_port: 6334
+  http_port: 6333
+  enable_static_content: true
+  static_content_dir: /home/YOURUSER/.hermes/qdrant_data/static
+
+log_level: INFO

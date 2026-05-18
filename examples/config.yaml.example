@@ -1,0 +1,14 @@
+# Copy to ~/.hermes/config.yaml and adjust.
+# This is the TOP-LEVEL Hermes config — providers/models/secrets live in the gateway env,
+# keeping this file small and non-secret.
+
+auxiliary:
+  vision:
+    # Separate model for image understanding (screenshots, photos, PDFs-as-images).
+    # Using a cheaper cloud model for vision keeps main-conversation costs down.
+    model: glm-5.3-flash:cloud
+    provider: ollama-cloud
+
+onboarding:
+  seen:
+    busy_input_prompt: true

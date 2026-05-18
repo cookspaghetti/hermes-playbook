@@ -1,0 +1,60 @@
+# Copy to ~/.hermes/mem0.json — Mem0 OSS memory stack configuration.
+#
+# Architecture notes (see docs/memory-architecture.md):
+# - LLM leg: OpenAI-compatible client pointed at Ollama Cloud (any OpenAI-compatible
+#   endpoint works). Temperature LOW (0.1) — extraction should be deterministic.
+# - Embedder leg: LOCAL Ollama serve on :11434. GPU model = fast warm embeddings.
+#   embedding_dims MUST match the model's output dims (qwen3-embedding = 2560).
+# - Vector store: local Qdrant. collection created automatically; dims must match embedder.
+# - Reranker: local cross-encoder on CPU. Bge-reranker-base is the sweet spot of
+#   quality vs RAM for a single-user deployment.
+# - temporal_boost: boosts recently-stored memories in search ranking. weight 0.2,
+#   scale = 1 week (604800s) — memories older than a week get no boost.
+#
+# GOTCHA: even with provider "openai" for the LLM, mem0's factory instantiates an
+# OpenAI client — it will 401 without ANY api_key. Use the same key as your endpoint.
+{
+  "mode": "oss",
+  "rerank": true,
+  "oss": {
+    "llm": {
+      "provider": "openai",
+      "config": {
+        "model": "glm-5.3-flash:cloud",
+        "openai_base_url": "https://ollama.com/v1",
+        "api_key": "sk-YOUR-OLLAMA-CLOUD-KEY",
+        "temperature": 0.1,
+        "max_tokens": 1500
+      }
+    },
+    "embedder": {
+      "provider": "ollama",
+      "config": {
+        "model": "qwen3-embedding-gpu",
+        "ollama_base_url": "http://localhost:11434",
+        "embedding_dims": 2560
+      }
+    },
+    "vector_store": {
+      "provider": "qdrant",
+      "config": {
+        "host": "localhost",
+        "port": 6333,
+        "collection_name": "hermes",
+        "embedding_model_dims": 2560
+      }
+    },
+    "reranker": {
+      "provider": "sentence_transformer",
+      "config": {
+        "model": "BAAI/bge-reranker-base",
+        "device": "cpu"
+      }
+    },
+    "temporal_boost": {
+      "enabled": true,
+      "weight": 0.2,
+      "scale": 604800
+    }
+  }
+}

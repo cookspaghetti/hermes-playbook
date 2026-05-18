@@ -1,0 +1,25 @@
+# Secrets & credentials (SECURITY-CRITICAL: never commit)
+.env
+.env.*
+!examples/env.example
+
+# Local data stores (contain real memory / telemetry)
+qdrant_data/
+*.sqlite3
+*.session
+*.session-journal
+*.pem
+*.key
+keys/
+secrets/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
