@@ -19,23 +19,13 @@ silently stalls. Configure timeouts explicitly; do not trust library defaults.
 
 ## Retrieval Pipeline
 
-```
-user message
-    │
-    ▼
-[semantic search] ── Qdrant cosine over 2560-d embeddings
-    │                  + BM25 sparse leg
-    ▼
-[candidate set]
-    │
-    ▼
-[cross-encoder rerank] ── bge-reranker-base scores query×memory pairs
-    │
-    ▼
-[temporal boost] ── recent memories scaled up:
-    │                 weight 0.2, half-life ~1 week (604800s)
-    ▼
-[final ranking → injected into context]
+```mermaid
+flowchart TD
+    U[user message] --> SS[semantic search<br/>Qdrant cosine, 2560-d embeddings<br/>+ BM25 sparse leg]
+    SS --> CS[candidate set]
+    CS --> RR[cross-encoder rerank<br/>bge-reranker-base, query×memory pairs]
+    RR --> TB[temporal boost<br/>weight 0.2, ~1 week half-life]
+    TB --> FR[final ranking<br/>injected into context]
 ```
 
 **Why hybrid (semantic + BM25)?** Pure vector search misses exact identifiers — account

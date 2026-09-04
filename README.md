@@ -33,25 +33,25 @@ Hermes Agent is an open-source AI agent framework. This playbook covers a deploy
 
 ## Reference Architecture
 
-```
-┌─────────────┐   messages    ┌──────────────────┐
-│  Telegram    │◄────────────►│  Hermes Gateway   │
-│  (DM/chats)  │              │  (systemd service) │
-└─────────────┘              └────────┬─────────┘
-                                      │
-                    ┌─────────────────┼──────────────────┐
-                    ▼                 ▼                  ▼
-            ┌────────────┐   ┌──────────────┐   ┌─────────────┐
-            │ LLM Router │   │  Mem0 + Qdrant │   │  Cron jobs   │
-            │ (Ollama     │   │  (memory OSS) │   │  (scheduler) │
-            │  Cloud API) │   └──────┬───────┘   └──────┬──────┘
-            └────────────┘          │                  │
-                                  ▼                  ▼
-                          ┌──────────────┐    ┌────────────────┐
-                          │ Embedder +   │    │ no_agent scripts │
-                          │ Reranker     │    │ (pure code runs) │
-                          │ (local GPU/CPU)│  └────────────────┘
-                          └──────────────┘
+```mermaid
+flowchart LR
+    TG[Telegram<br/>DM / chats] <-->|messages| GW[Hermes Gateway<br/>systemd service]
+
+    GW -->|LLM calls| LLM[LLM Router<br/>Ollama Cloud API]
+
+    subgraph MEMORY [Memory Stack]
+        M[Mem0 OSS] --> Q[Qdrant<br/>local vector DB]
+        M --> E[Embedder<br/>local GPU model]
+        M --> R[Reranker<br/>local CPU cross-encoder]
+    end
+    GW <--> M
+
+    GW --> CR[Cron Scheduler]
+
+    subgraph JOBS [Scheduled Jobs]
+        CR --> NA[no_agent scripts<br/>deterministic outputs]
+        CR --> AG[agent sessions<br/>LLM-driven, optional]
+    end
 ```
 
 Key properties:
